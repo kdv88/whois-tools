@@ -1,0 +1,50 @@
+# Dependencies
+/vendor/
+composer.lock
+
+# PHPUnit
+.phpunit.result.cache
+/coverage/
+/build/
+/reports/
+
+# OS junk
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# Editors/IDEs
+.vscode/
+.idea/
+*.iml
+
+# Node (if any tooling present)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Logs
+*.log
+logs/
+storage/logs/
+
+# Cache/temp
+.cache/
+.php-cs-fixer.cache
+*.cache
+tmp/
+temp/
+
+# Composer artifacts
+composer.phar
+
+# Misc
+*.swp
+*.swo
+*.orig
+*.bak
+*.tmp

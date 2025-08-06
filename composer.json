@@ -1,0 +1,46 @@
+{
+    "name": "galangw/whois-tools",
+    "description": "A reusable PHP package for WHOIS and RDAP lookups, with optional Laravel support.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "GalangW",
+            "email": "nganuwijaya05@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "jeremykendall/php-domain-parser": "^6.0",
+        "symfony/polyfill-intl-idn": "^1.32"
+    },
+    "autoload": {
+        "psr-4": {
+            "Galangw\\WhoisTools\\": "src/Galangw/WhoisTools/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Galangw\\WhoisTools\\Laravel\\WhoisToolsServiceProvider"
+            ],
+            "aliases": {
+                "WhoisTools": "Galangw\\WhoisTools\\Laravel\\Facades\\WhoisTools"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require-dev": {
+        "phpunit/phpunit": "^10.5 || ^11.0",
+        "illuminate/support": "^10.0 || ^11.0"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Galangw\\WhoisTools\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
