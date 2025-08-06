@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Galangw\\WhoisTools\\": "src/Galangw/WhoisTools/"
+            "Galangw\\WhoisTools\\": "src/"
         }
     },
     "extra": {
