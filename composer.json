@@ -3,6 +3,7 @@
     "description": "A reusable PHP package for WHOIS and RDAP lookups, with optional Laravel support.",
     "type": "library",
     "license": "MIT",
+    "version": "1.1.0",
     "authors": [
         {
             "name": "GalangW",
