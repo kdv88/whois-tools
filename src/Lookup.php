@@ -14,6 +14,8 @@ use Galangw\WhoisTools\Parsers\ParserRDAP;
 
 class Lookup
 {
+  private const PUBLIC_SUFFIX_LIST = '/resources/data/public-suffix-list.dat';
+
   public $domain;
 
   public $extension;
@@ -58,7 +60,7 @@ class Lookup
 
   private function parseDomain($domain)
   {
-    $publicSuffixList = Rules::fromPath(__DIR__ . "/Data/public-suffix-list.dat");
+    $publicSuffixList = Rules::fromPath($this->resolvePath('public_suffix_list', self::PUBLIC_SUFFIX_LIST));
     $domain = Domain::fromIDNA2008($domain);
 
     try {
@@ -155,6 +157,29 @@ class Lookup
         $this->rdapError = $e->getMessage();
       }
     }
+  }
+
+  private function resolvePath(string $key, string $defaultRelativePath): string
+  {
+    $configKey = 'whois-tools.paths.' . $key;
+    $namespacedConfig = __NAMESPACE__ . '\config';
+    $path = null;
+
+    if (function_exists($namespacedConfig)) {
+      $path = $namespacedConfig($configKey);
+    } else if (function_exists('config')) {
+      $path = config($configKey);
+    }
+
+    if (!is_string($path) || $path === '') {
+      $path = dirname(__DIR__) . $defaultRelativePath;
+    }
+
+    if (!is_readable($path)) {
+      throw new RuntimeException("Configured path for '$key' is not readable");
+    }
+
+    return $path;
   }
 
   private function merge()

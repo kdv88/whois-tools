@@ -201,7 +201,7 @@ try {
         
         // Verify config structure
         if (isset($config) && is_array($config)) {
-            $requiredKeys = ['timeout_whois', 'timeout_rdap', 'default_sources'];
+            $requiredKeys = ['default_sources'];
             foreach ($requiredKeys as $key) {
                 if (array_key_exists($key, $config)) {
                     echo "✅ Config key '{$key}': " . json_encode($config[$key]) . "\n";
@@ -280,10 +280,7 @@ echo "===========================================\n";
 try {
     // Create manager with mock config
     $mockConfig = [
-        'timeout_whois' => 30,
-        'timeout_rdap' => 10,
-        'default_sources' => ['rdap'],
-        'paths' => []
+        'default_sources' => ['rdap']
     ];
     
     $manager = new WhoisToolsManager($mockConfig);

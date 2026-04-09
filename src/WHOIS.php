@@ -6,6 +6,10 @@ use RuntimeException;
 
 class WHOIS
 {
+    private const SERVERS_IANA = '/resources/data/whois-servers-iana.json';
+    private const SERVERS_EXTRA = '/resources/data/whois-servers-extra.json';
+    private const TIMEOUT = 10;
+
     public string $domain;
     public string $extension;
 
@@ -13,9 +17,6 @@ class WHOIS
     private string|array $server = '';
 
     private ?string $extensionTop;
-
-    private const SERVERS_IANA = __DIR__ . "/data/whois-servers-iana.json";
-    private const SERVERS_EXTRA = __DIR__ . "/data/whois-servers-extra.json";
 
     public function __construct(string $domain, string $extension, ?string $extensionTop = null, ?string $overrideServer = null)
     {
@@ -41,8 +42,7 @@ class WHOIS
         $servers = [];
 
         if (
-            file_exists(self::SERVERS_IANA) &&
-            ($json = file_get_contents(self::SERVERS_IANA)) !== false
+            ($json = file_get_contents($this->resolvePath('whois_servers_iana', self::SERVERS_IANA))) !== false
         ) {
             $decoded = json_decode($json, true);
             if (is_array($decoded)) {
@@ -51,8 +51,7 @@ class WHOIS
         }
 
         if (
-            file_exists(self::SERVERS_EXTRA) &&
-            ($json = file_get_contents(self::SERVERS_EXTRA)) !== false
+            ($json = file_get_contents($this->resolvePath('whois_servers_extra', self::SERVERS_EXTRA))) !== false
         ) {
             $decoded = json_decode($json, true);
             if (is_array($decoded)) {
@@ -90,13 +89,13 @@ class WHOIS
             $query = str_replace("{domain}", $domain, $this->server["query"]);
         }
 
-        $socket = @stream_socket_client("tcp://$host:43", $errno, $errstr, 10);
+        $socket = @stream_socket_client("tcp://$host:43", $errno, $errstr, self::TIMEOUT);
 
         if (!$socket) {
             throw new RuntimeException($errstr);
         }
 
-        stream_set_timeout($socket, 10);
+        stream_set_timeout($socket, self::TIMEOUT);
 
         fwrite($socket, $query);
 
@@ -116,5 +115,28 @@ class WHOIS
         fclose($socket);
 
         return $data;
+    }
+
+    private function resolvePath(string $key, string $defaultRelativePath): string
+    {
+        $configKey = 'whois-tools.paths.' . $key;
+        $namespacedConfig = __NAMESPACE__ . '\config';
+        $path = null;
+
+        if (function_exists($namespacedConfig)) {
+            $path = $namespacedConfig($configKey);
+        } else if (function_exists('config')) {
+            $path = config($configKey);
+        }
+
+        if (!is_string($path) || $path === '') {
+            $path = dirname(__DIR__) . $defaultRelativePath;
+        }
+
+        if (!is_readable($path)) {
+            throw new RuntimeException("Configured path for '$key' is not readable");
+        }
+
+        return $path;
     }
 }

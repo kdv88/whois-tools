@@ -6,6 +6,10 @@ use RuntimeException;
 
 class RDAP
 {
+    private const SERVERS_IANA = '/resources/data/rdap-servers-iana.json';
+    private const SERVERS_EXTRA = '/resources/data/rdap-servers-extra.json';
+    private const TIMEOUT = 10;
+
     public string $domain;
     public string $extension;
 
@@ -13,9 +17,6 @@ class RDAP
     private string $server = '';
 
     private ?string $extensionTop;
-
-    private const SERVERS_IANA = __DIR__ . "/data/rdap-servers-iana.json";
-    private const SERVERS_EXTRA = __DIR__ . "/data/rdap-servers-extra.json";
 
     public function __construct(string $domain, string $extension, ?string $extensionTop = null, ?string $overrideServer = null)
     {
@@ -41,8 +42,7 @@ class RDAP
         $servers = [];
 
         if (
-            file_exists(self::SERVERS_IANA) &&
-            ($json = file_get_contents(self::SERVERS_IANA)) !== false
+            ($json = file_get_contents($this->resolvePath('rdap_servers_iana', self::SERVERS_IANA))) !== false
         ) {
             $decoded = json_decode($json, true);
             if (is_array($decoded) && isset($decoded['services'])) {
@@ -58,8 +58,7 @@ class RDAP
         }
 
         if (
-            file_exists(self::SERVERS_EXTRA) &&
-            ($json = file_get_contents(self::SERVERS_EXTRA)) !== false
+            ($json = file_get_contents($this->resolvePath('rdap_servers_extra', self::SERVERS_EXTRA))) !== false
         ) {
             $decoded = json_decode($json, true);
             if (is_array($decoded)) {
@@ -96,7 +95,7 @@ class RDAP
 
         curl_setopt_array($curl, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 10,
+            CURLOPT_TIMEOUT => self::TIMEOUT,
         ]);
 
         $response = curl_exec($curl);
@@ -116,5 +115,28 @@ class RDAP
         }
 
         return [$code, $response];
+    }
+
+    private function resolvePath(string $key, string $defaultRelativePath): string
+    {
+        $configKey = 'whois-tools.paths.' . $key;
+        $namespacedConfig = __NAMESPACE__ . '\config';
+        $path = null;
+
+        if (function_exists($namespacedConfig)) {
+            $path = $namespacedConfig($configKey);
+        } else if (function_exists('config')) {
+            $path = config($configKey);
+        }
+
+        if (!is_string($path) || $path === '') {
+            $path = dirname(__DIR__) . $defaultRelativePath;
+        }
+
+        if (!is_readable($path)) {
+            throw new RuntimeException("Configured path for '$key' is not readable");
+        }
+
+        return $path;
     }
 }
